@@ -8,14 +8,18 @@
 <body>
     <canvas width="400" height="300"/>
     <script type="module">
-        const W = 400;
+        const W = 300;
         const H = 300;
         const S = 10;
         const HS = H/S;
         const WS = W/S;
-        const COLORS = ["tan","chocolate","brown"];
+        console.log(S,W,H,WS,HS);
+        
         var canvas = document.querySelector("canvas");
         var ctx = canvas.getContext("2d");
+        const COLORS = ["tan","chocolate","brown"];
+        canvas.width = W;
+        canvas.height = H;
         var map = [];
         var map2 = [];
         var sou = map;
@@ -42,7 +46,7 @@
         map[2][5]=1;
         map[5][5]=2;
         map[5][4]=2;
-        
+        var steps = 100;
         var te = 0;
         var dt = 0;
         var req = requestAnimationFrame(fullstep);
@@ -51,15 +55,16 @@
             automastep();
             drawMap();
             te = t;
-            if(t < 1000){
+            if(steps--){
                 req = requestAnimationFrame(fullstep);
             }
         }
         function drawMap(){
             for (let l = 0; l < HS; l++) {
-                for (let c = 0; c <WS; c++) {
+                for (let c = 0; c < WS; c++) {
+                    if (c > 35) console.log(c);
                     ctx.fillStyle = COLORS[map[l][c]];
-                    ctx.fillRect(l*S,c*S,S,S);
+                    ctx.fillRect(c*S,l*S,S,S);
                 }
             }
         }
@@ -67,7 +72,7 @@
             let total = 0;
             for (let l = y-1; l <= y+1; l++) {
                 for (let c = x-1; c <=x+1; c++) {
-                    if((x==c&&y==l)||l<0||c<0||l>=HS||c>=W/S){
+                    if(l<0||c<0||l>=HS||c>=WS|| (x == c && y == l)){
                         continue;
                     }else if(mat[l][c]===tp){
                         total++;
@@ -77,21 +82,18 @@
             return total;            
         }
         function automastep(){
-            for (let l = 0; l < H / S; l++) {
-                for (let c = 0; c < W / S; c++) {
+            for (let l = 0; l < HS; l++) {
+                for (let c = 0; c < WS; c++) {
                     if(countAd(sou,l,c,1)>=5){
                         tar[l][c] = 0;
-                    } else 
-                    if (countAd(sou, l, c, 2)===1 && countAd(sou, l, c, 0) >= 1) {
+                    } else if (countAd(sou, l, c, 2)===1 && countAd(sou, l, c, 0) >= 1) {
                         tar[l][c] = 2;
-                    } else
-                    if (countAd(sou, l, c, 2)>=1) {
+                    } else if (countAd(sou, l, c, 2)>=1) {
                         tar[l][c] = 1;
                     }
                 }
             }
-            
-            var aux = sou;
+            let aux = sou;
             sou = tar;
             tar = aux;
         }
