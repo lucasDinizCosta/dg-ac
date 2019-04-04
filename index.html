@@ -11,26 +11,89 @@
         const W = 400;
         const H = 300;
         const S = 10;
+        const HS = H/S;
+        const WS = W/S;
         const COLORS = ["tan","chocolate","brown"];
         var canvas = document.querySelector("canvas");
         var ctx = canvas.getContext("2d");
         var map = [];
         var map2 = [];
-        for (let l = 0; l < H/S; l++) {
+        var sou = map;
+        var tar = map2;
+        for (let l = 0; l < HS; l++) {
             map[l] = [];
             map2[l] = [];
-            for (let c = 0; c < W/S; c++) {
+            for (let c = 0; c <WS; c++) {
                 map[l][c] = 0;
                 map2[l][c] = 0;
             }
         }
-        map[3][4]=1;
+
+            map[3][4] = 1;
+            map[2][4] = 1;
+            map[4][4] = 1;
+            map[3][3] = 1;
+            map[2][3] = 1;
+            map[4][3] = 1;
+            map[3][2] = 1;
+            map[2][2] = 1;
+            map[4][2] = 1;
+        map[3][5]=1;
+        map[2][5]=1;
+        map[5][5]=2;
         map[5][4]=2;
-        for (let l = 0; l < H/S; l++) {
-            for (let c = 0; c < W/S; c++) {
-                ctx.fillStyle = COLORS[map[l][c]];
-                ctx.fillRect(c*S,l*S,S,S);
+        
+        var te = 0;
+        var dt = 0;
+        var req = requestAnimationFrame(fullstep);
+        function fullstep(t) {
+            dt = (t-te)/1000;
+            automastep();
+            drawMap();
+            te = t;
+            if(t < 1000){
+                req = requestAnimationFrame(fullstep);
             }
+        }
+        function drawMap(){
+            for (let l = 0; l < HS; l++) {
+                for (let c = 0; c <WS; c++) {
+                    ctx.fillStyle = COLORS[map[l][c]];
+                    ctx.fillRect(l*S,c*S,S,S);
+                }
+            }
+        }
+        function countAd(mat, x, y, tp){
+            let total = 0;
+            for (let l = y-1; l <= y+1; l++) {
+                for (let c = x-1; c <=x+1; c++) {
+                    if((x==c&&y==l)||l<0||c<0||l>=HS||c>=W/S){
+                        continue;
+                    }else if(mat[l][c]===tp){
+                        total++;
+                    }
+                }
+            }
+            return total;            
+        }
+        function automastep(){
+            for (let l = 0; l < H / S; l++) {
+                for (let c = 0; c < W / S; c++) {
+                    if(countAd(sou,l,c,1)>=5){
+                        tar[l][c] = 0;
+                    } else 
+                    if (countAd(sou, l, c, 2)===1 && countAd(sou, l, c, 0) >= 1) {
+                        tar[l][c] = 2;
+                    } else
+                    if (countAd(sou, l, c, 2)>=1) {
+                        tar[l][c] = 1;
+                    }
+                }
+            }
+            
+            var aux = sou;
+            sou = tar;
+            tar = aux;
         }
 
 
