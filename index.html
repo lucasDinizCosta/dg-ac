@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DG-AC</title>
+</head>
+<body>
+    <canvas width="400" height="300"/>
+    <script type="module">
+        const W = 400;
+        const H = 300;
+        const S = 10;
+        const COLORS = ["tan","chocolate","brown"];
+        var canvas = document.querySelector("canvas");
+        var ctx = canvas.getContext("2d");
+        var map = [];
+        var map2 = [];
+        for (let l = 0; l < H/S; l++) {
+            map[l] = [];
+            map2[l] = [];
+            for (let c = 0; c < W/S; c++) {
+                map[l][c] = 0;
+                map2[l][c] = 0;
+            }
+        }
+        map[3][4]=1;
+        map[5][4]=2;
+        for (let l = 0; l < H/S; l++) {
+            for (let c = 0; c < W/S; c++) {
+                ctx.fillStyle = COLORS[map[l][c]];
+                ctx.fillRect(c*S,l*S,S,S);
+            }
+        }
+
+
+    </script>
+</body>
+</html>
