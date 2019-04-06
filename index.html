@@ -6,65 +6,92 @@
     <title>DG-AC</title>
 </head>
 <body>
-    <canvas width="400" height="300"/>
+    mapa
+    <canvas width="400" height="300"></canvas>
+    map2
+    <canvas width="400" height="300"></canvas>
     <script type="module">
-        const W = 300;
+        const W = 400;
         const H = 300;
         const S = 10;
         const HS = H/S;
         const WS = W/S;
-        console.log(S,W,H,WS,HS);
-        
-        var canvas = document.querySelector("canvas");
-        var ctx = canvas.getContext("2d");
         const COLORS = ["tan","chocolate","brown"];
-        canvas.width = W;
-        canvas.height = H;
+        console.log(S,W,H,WS,HS);
+        var steps = 0;
         var map = [];
         var map2 = [];
-        var sou = map;
-        var tar = map2;
-        for (let l = 0; l < HS; l++) {
-            map[l] = [];
-            map2[l] = [];
-            for (let c = 0; c <WS; c++) {
-                map[l][c] = 0;
-                map2[l][c] = 0;
+        var te = 0;
+        var dt = 0;
+        map = initMap(HS,WS,1);
+        map2 = initMap(HS,WS,0);
+        //var req = requestAnimationFrame(fullstep);
+        
+        var canvas = document.querySelectorAll("canvas")[0];
+        var canvas2 = document.querySelectorAll("canvas")[1];
+        canvas.width = W;
+        canvas.height = H;
+        canvas2.width = W;
+        canvas2.height = H;
+        var ctx = canvas.getContext("2d");
+        var ctx2 = canvas2.getContext("2d");
+        setArea(map, 2,2,3,3,0);
+        automastep();
+        toggleMaps();
+
+        drawMap(map)
+        drawMap(map2,1)
+
+        canvas.addEventListener("click", function(e){
+            let tC = Math.floor(e.offsetX/S);
+            let tL = Math.floor(e.offsetY/S);
+            
+            setArea(map,tC,tL,3,3, 0);
+            automastep()
+            toggleMaps()
+            drawMap(map)
+            drawMap(map2,2)
+            //steps= 1;
+            //requestAnimationFrame(fullstep)
+        });
+
+        function setArea(mapx, x,y,w,h, v) {
+            const mL = Math.max(y, 0);
+            const ML = Math.min(y+h, mapx.length);
+            const mC = Math.max(x, 0);
+            const MC = Math.min(x+w, mapx[0].length);
+                    console.log(mL,ML, mC, MC)
+            for (let l = mL; l < ML; l++) {
+                for (let c = mC; c <MC; c++) {
+                    mapx[l][c] = v;
+
+                }
             }
         }
 
-            map[3][4] = 1;
-            map[2][4] = 1;
-            map[4][4] = 1;
-            map[3][3] = 1;
-            map[2][3] = 1;
-            map[4][3] = 1;
-            map[3][2] = 1;
-            map[2][2] = 1;
-            map[4][2] = 1;
-        map[3][5]=1;
-        map[2][5]=1;
-        map[5][5]=2;
-        map[5][4]=2;
-        var steps = 100;
-        var te = 0;
-        var dt = 0;
-        var req = requestAnimationFrame(fullstep);
         function fullstep(t) {
             dt = (t-te)/1000;
             automastep();
-            drawMap();
+            toggleMaps();
+            drawMap(map);
             te = t;
-            if(steps--){
+            if(steps-->0){
                 req = requestAnimationFrame(fullstep);
             }
         }
-        function drawMap(){
-            for (let l = 0; l < HS; l++) {
-                for (let c = 0; c < WS; c++) {
-                    if (c > 35) console.log(c);
-                    ctx.fillStyle = COLORS[map[l][c]];
-                    ctx.fillRect(c*S,l*S,S,S);
+        function drawMap(mapx,cv){
+            console.log(mapx.length, mapx[0].length);
+            
+            for (let l = 0; l < mapx.length; l++) {
+                for (let c = 0; c < mapx[0].length; c++) {
+                    if(!cv){
+                        ctx.fillStyle = COLORS[mapx[l][c]];
+                        ctx.fillRect(c*S,l*S,S,S);
+                    }else{
+                        ctx2.fillStyle = COLORS[mapx[l][c]];
+                        ctx2.fillRect(c*S,l*S,S,S);
+
+                    }
                 }
             }
         }
@@ -72,7 +99,7 @@
             let total = 0;
             for (let l = y-1; l <= y+1; l++) {
                 for (let c = x-1; c <=x+1; c++) {
-                    if(l<0||c<0||l>=HS||c>=WS|| (x == c && y == l)){
+                    if(l<0||c<0||l>=HS||c>=WS|| (x === c && y === l)){
                         continue;
                     }else if(mat[l][c]===tp){
                         total++;
@@ -81,21 +108,47 @@
             }
             return total;            
         }
+        function toggleMaps(){
+            map = JSON.parse(JSON.stringify(map2));
+        }
+
         function automastep(){
-            for (let l = 0; l < HS; l++) {
-                for (let c = 0; c < WS; c++) {
-                    if(countAd(sou,l,c,1)>=5){
-                        tar[l][c] = 0;
-                    } else if (countAd(sou, l, c, 2)===1 && countAd(sou, l, c, 0) >= 1) {
-                        tar[l][c] = 2;
-                    } else if (countAd(sou, l, c, 2)>=1) {
-                        tar[l][c] = 1;
+            for (let l = 0; l < map2.length; l++) {
+                for (let c = 0; c < map2.length; c++) {
+                    map2[l][c] = map[l][c];
+                    switch ((map[l][c])) {
+                        case 1:
+                            if ((countAd(map, l, c, 0) > 0)) {
+                                    map2[l][c] = 2;
+                            } 
+                            
+                            break;
+                    
+                        default:
+                            break;
                     }
+                 //   if(countAd(sou,l,c,1)>=5){
+                   //     tar[l][c] = 0;
+                   // } //else if (countAd(sou, l, c, 0)>=1) {
+                       // tar[l][c] = 2;
+                    //}//else 
+                   // if (tar[l][c]==1 && countAd(sou, l, c, 0) >= 1) {
+                    //    tar[l][c] = 2;
+                   // }
                 }
             }
-            let aux = sou;
-            sou = tar;
-            tar = aux;
+
+        }
+
+        function initMap(L,C,v){
+            let mapx = []
+            for (let l = 0; l < L; l++) {
+                mapx[l] = [];
+                for (let c = 0; c < C; c++) {
+                    mapx[l][c] = v;
+                }
+            }
+            return mapx;
         }
 
 
