@@ -38,8 +38,6 @@
       //setArea(map, 2, 2, 3, 3, 0);
       //setArea(map, 4, 5, 3, 3, 0);
       //setArea(map, 12, 12, 3, 3, 0);
-      //automastep();
-      //toggleMaps();
 
       drawMap(map);
       drawMap(map2, 1);
@@ -56,12 +54,8 @@
         let tL = Math.floor(e.offsetY / S);
 
         setArea(map, tC, tL, 3, 3, 0);
-        automastep();
-        //toggleMaps()
-        drawMap(map);
-        drawMap(map2, 1);
-        //steps= 1;
-        //requestAnimationFrame(fullstep)
+        steps = 10;
+        requestAnimationFrame(fullstep);
       });
 
       function setArea(mapx, x, y, w, h, v) {
@@ -81,9 +75,10 @@
         automastep();
         toggleMaps();
         drawMap(map);
+        drawMap(map2, 1);
         te = t;
         if (steps-- > 0) {
-          req = requestAnimationFrame(fullstep);
+          requestAnimationFrame(fullstep);
         }
       }
       function drawMap(mapx, cv) {
@@ -123,18 +118,24 @@
       function automastep() {
         for (let l = 0; l < map2.length; l++) {
           for (let c = 0; c < map2[0].length; c++) {
+            map2[l][c] = map[l][c];
             switch (map[l][c]) {
-              case 1:
-                if (countAd(map, l, c, 0) > 0) {
-                  map2[l][c] = 2;
-                } else {
-                  map2[l][c] = 1;
+              case 2:
+                if (countAd(map, l, c, 2) >= 3) {
+                  map2[l][c] = 0;
+                }
+                if (countAd(map, l, c, 0) >= 3) {
+                  map2[l][c] = 0;
                 }
 
                 break;
-
-              default:
-                map2[l][c] = map[l][c];
+              case 1:
+                if (countAd(map, l, c, 0) > 5) {
+                  map2[l][c] = 0;
+                }
+                if (countAd(map, l, c, 0) > 0) {
+                  map2[l][c] = 2;
+                }
                 break;
             }
             //   if(countAd(sou,l,c,1)>=5){
