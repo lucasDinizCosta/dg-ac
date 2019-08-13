@@ -167,8 +167,24 @@
         return mapx;
       }
 
+      buttons[0].addEventListener("click", function(){
+        map  = initMap(HS, WS, 1);
+        map2 = initMap(HS, WS, 0);
+        drawMap(map);
+      });
+
       buttons[1].addEventListener("click", function(){
+        steps = 1;
+        fullstep(0);
+      });
+
+      buttons[2].addEventListener("click", function(){
         fullstep();
+        //console.log("Foi");
+      });
+
+      buttons[3].addEventListener("click", function(){
+        
       });
     </script>
   </body>
