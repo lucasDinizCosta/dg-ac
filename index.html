@@ -6,10 +6,15 @@
     <title>DG-AC</title>
   </head>
   <body>
-    mapa
     <canvas width="400" height="300"></canvas>
-    map2
-    <canvas width="400" height="300"></canvas>
+    <!--canvas width="400" height="300"></canvas>-->
+    <div>
+
+      <button>Reset</button>
+      <button>Step</button>
+      <button>Play</button>
+      <button>Stop</button>
+    </div>
     <script type="module">
       const W = 400;
       const H = 300;
@@ -28,13 +33,14 @@
       //var req = requestAnimationFrame(fullstep);
 
       var canvas = document.querySelectorAll("canvas")[0];
-      var canvas2 = document.querySelectorAll("canvas")[1];
+      var buttons = document.querySelectorAll("button");
+      //var canvas2 = document.querySelectorAll("canvas")[1];
       canvas.width = W;
       canvas.height = H;
-      canvas2.width = W;
-      canvas2.height = H;
+      //canvas2.width = W;
+     // canvas2.height = H;
       var ctx = canvas.getContext("2d");
-      var ctx2 = canvas2.getContext("2d");
+     // var ctx2 = canvas2.getContext("2d");
       //setArea(map, 2, 2, 3, 3, 0);
       //setArea(map, 4, 5, 3, 3, 0);
       //setArea(map, 12, 12, 3, 3, 0);
@@ -88,8 +94,8 @@
               ctx.fillStyle = COLORS[mapx[l][c]];
               ctx.fillRect(c * S, l * S, S, S);
             } else {
-              ctx2.fillStyle = COLORS[mapx[l][c]];
-              ctx2.fillRect(c * S, l * S, S, S);
+             // ctx2.fillStyle = COLORS[mapx[l][c]];
+             // ctx2.fillRect(c * S, l * S, S, S);
             }
           }
         }
@@ -160,6 +166,10 @@
         }
         return mapx;
       }
+
+      buttons[1].addEventListener("click", function(){
+        fullstep();
+      });
     </script>
   </body>
 </html>
