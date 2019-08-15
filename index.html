@@ -14,6 +14,7 @@
       <button>Step</button>
       <button>Play</button>
       <button>Stop</button>
+      <button>Glider</button>
     </div>
     <script type="module">
       const W = 400;
@@ -29,39 +30,22 @@
       var te = 0;
       var dt = 0;
       map = initMap(HS, WS, 1);
-      map2 = initMap(HS, WS, 0);
-      //var req = requestAnimationFrame(fullstep);
+      map2 = initMap(HS, WS, 1);
+      var animation = true;
 
       var canvas = document.querySelectorAll("canvas")[0];
       var buttons = document.querySelectorAll("button");
-      //var canvas2 = document.querySelectorAll("canvas")[1];
       canvas.width = W;
       canvas.height = H;
-      //canvas2.width = W;
-     // canvas2.height = H;
       var ctx = canvas.getContext("2d");
-     // var ctx2 = canvas2.getContext("2d");
-      //setArea(map, 2, 2, 3, 3, 0);
-      //setArea(map, 4, 5, 3, 3, 0);
-      //setArea(map, 12, 12, 3, 3, 0);
-
       drawMap(map);
-      drawMap(map2, 1);
-
-      //setArea(map, 12,3,3,3,0);
-      //automastep();
-      //toggleMaps();
-
-      drawMap(map);
-      drawMap(map2, 1);
 
       canvas.addEventListener("click", function(e) {
         let tC = Math.floor(e.offsetX / S);
         let tL = Math.floor(e.offsetY / S);
 
-        setArea(map, tC, tL, 3, 3, 0);
-        steps = 10;
-        requestAnimationFrame(fullstep);
+        setArea(map, tC, tL, 1, 1, 2);
+        drawMap(map);
       });
 
       function setArea(mapx, x, y, w, h, v) {
@@ -76,84 +60,67 @@
         }
       }
 
-      function fullstep(t) {
+      function fullstepGameOfLife(t) {
         dt = (t - te) / 1000;
-        automastep();
+        gameOfLifeRulesAutomata();
         toggleMaps();
         drawMap(map);
-        drawMap(map2, 1);
         te = t;
-        if (steps-- > 0) {
-          requestAnimationFrame(fullstep);
+        steps--;
+        if (steps > 0) {
+          requestAnimationFrame(fullstepGameOfLife);
         }
       }
-      function drawMap(mapx, cv) {
+
+      function fullstepGameOfLifeWithoutSteps(t){
+        dt = (t - te) / 1000;
+        gameOfLifeRulesAutomata();
+        toggleMaps();
+        drawMap(map);
+        te = t;
+        if (animation) {
+          requestAnimationFrame(fullstepGameOfLifeWithoutSteps);
+        }        
+      }
+
+      function drawMap(mapx) {
         for (let l = 0; l < mapx.length; l++) {
           for (let c = 0; c < mapx[0].length; c++) {
-            if (!cv) {
-              ctx.fillStyle = COLORS[mapx[l][c]];
-              ctx.fillRect(c * S, l * S, S, S);
-            } else {
-             // ctx2.fillStyle = COLORS[mapx[l][c]];
-             // ctx2.fillRect(c * S, l * S, S, S);
+            ctx.fillStyle = COLORS[mapx[l][c]];
+            ctx.fillRect(c * S, l * S, S, S);
+            if(mapx[l][c] === 2){
+              ctx.strokeStyle = "black";
+              ctx.strokeRect(c * S, l * S, S, S);
             }
           }
         }
       }
-      function countAd(mapx, y, x, tp) {
+
+      function countAdGameOfLife(mapx, y, x, tp) { //Conta as células de um tipo específico ao redor da célula (x,y)
         let total = 0;
         const mL = Math.max(y - 1, 0);
-        const ML = Math.min(y + 2, mapx.length);
+        const ML = Math.min(y + 1, mapx.length-1);
         const mC = Math.max(x - 1, 0);
-        const MC = Math.min(x + 2, mapx[0].length);
-
-        for (let l = mL; l < ML; l++) {
-          for (let c = mC; c < MC; c++) {
-            if (mapx[l][c] === tp && (x !== c && y !== l)) {
+        const MC = Math.min(x + 1, mapx[0].length-1);
+        //console.log("mL: "+ mL+ " ML: "+ ML + " mC: " + mC + " MC: " + MC + " x: "+ x + " y: " + y + " tp: "+ tp);
+        for (let l = mL; l <= ML; l++) {
+          for (let c = mC; c <= MC; c++) {
+            //console.log("["+l+"]"+"["+c+"] -- tp: " + mapx[l][c]);
+            if (mapx[l][c] === tp) {
+              //console.log("["+l+"]"+"["+c+"]");
               total++;
             }
           }
         }
+        if(mapx[y][x] === tp){ //Desconta o valor da celula central
+          total--;
+        }
+        //console.log("total: " + total);
         return total;
       }
 
       function toggleMaps() {
-        map = JSON.parse(JSON.stringify(map2));
-      }
-
-      function automastep() {
-        for (let l = 0; l < map2.length; l++) {
-          for (let c = 0; c < map2[0].length; c++) {
-            map2[l][c] = map[l][c];
-            switch (map[l][c]) {
-              case 2:
-                if (countAd(map, l, c, 2) >= 3) {
-                  map2[l][c] = 0;
-                }
-                if (countAd(map, l, c, 0) >= 3) {
-                  map2[l][c] = 0;
-                }
-
-                break;
-              case 1:
-                if (countAd(map, l, c, 0) > 5) {
-                  map2[l][c] = 0;
-                }
-                if (countAd(map, l, c, 0) > 0) {
-                  map2[l][c] = 2;
-                }
-                break;
-            }
-            //   if(countAd(sou,l,c,1)>=5){
-            //     tar[l][c] = 0;
-            // } //else if (countAd(sou, l, c, 0)>=1) {
-            // tar[l][c] = 2;
-            //}//else
-            // if (tar[l][c]==1 && countAd(sou, l, c, 0) >= 1) {
-            //    tar[l][c] = 2;
-            // }
-          }
-        }
+        map = JSON.parse(JSON.stringify(map2)); //Copia matriz
       }
 
       function initMap(L, C, v) {
@@ -167,25 +134,88 @@
         return mapx;
       }
 
+      function gameOfLifeRulesAutomata(){
+        for (let l = 0; l < map2.length; l++) {
+          for (let c = 0; c < map2[0].length; c++) {
+            map2[l][c] = map[l][c];
+            switch (map[l][c]) {
+              case 1: //Celula morta
+                if(countAdGameOfLife(map, l, c, 2) === 3){ //Com 3 vizinhos vivos, renasce
+                  map2[l][c] = 2;
+                  //console.log("Caso 4 -- ["+l+"]["+c+"]");
+                }
+                break;
+              case 2: //Celula viva
+                if (countAdGameOfLife(map, l, c, 2) >= 2 && countAdGameOfLife(map, l, c, 2) <= 3) {
+                  map2[l][c] = 2;
+                  //console.log("Caso 1");
+                }
+                else if (countAdGameOfLife(map, l, c, 2) >= 0 && countAdGameOfLife(map, l, c, 2) <= 1) {
+                  map2[l][c] = 1;
+                  //console.log("Caso 2");
+                }
+                else if (countAdGameOfLife(map, l, c, 2) >= 4){
+                  map2[l][c] = 1;
+                  //console.log("Caso 3");
+                }
+                break;
+            }
+            /*if(l === 1 && c === 1){
+              console.logcountAdGameOfLife(map, l, c, 2));
+            }*/
+          }
+        }
+        //console.log(map2);
+      }
+
+      function putGliderOnScreen(map){
+        // 1 Glider
+        map[27][37] = 2;
+        map[27][38] = 2;
+        map[26][38] = 2;
+        map[28][37] = 2;
+        map[28][39] = 2;
+
+        // 2 Glider
+        map[10][10] = 2;
+        map[10][11] = 2;
+        map[9][11] = 2;
+        map[11][10] = 2;
+        map[11][12] = 2;
+
+        //map[29][39] = 0;// Ponto final do mapa
+        drawMap(map);
+      }
+
       buttons[0].addEventListener("click", function(){
+        animation = false;
         map  = initMap(HS, WS, 1);
-        map2 = initMap(HS, WS, 0);
+        map2 = initMap(HS, WS, 1);
+        animation = true;
         drawMap(map);
       });
 
       buttons[1].addEventListener("click", function(){
         steps = 1;
-        fullstep(0);
+        fullstepGameOfLife();
       });
 
       buttons[2].addEventListener("click", function(){
-        fullstep();
-        //console.log("Foi");
+        animation = true;
+        fullstepGameOfLifeWithoutSteps();
+        //requestAnimationFrame(fullstepGameOfLifeWithoutSteps());
       });
 
       buttons[3].addEventListener("click", function(){
-        
+        animation = false;
+        steps = 0;
       });
+
+      buttons[4].addEventListener("click", function(){
+        console.log("Posicionando glider na interface");
+        putGliderOnScreen(map);
+      });
+
     </script>
   </body>
 </html>
