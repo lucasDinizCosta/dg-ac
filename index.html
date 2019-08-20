@@ -14,11 +14,15 @@
         <option value="death">Game of Death</option>
         <option value="wall">Game of Wall</option>
       </select>
-      <button>Reset</button>
+      <select name="scenarios">
+        <option value="">Scenarios</option>
+        <option value="gliders">Gliders</option>
+        <option value="reset1">Reset 1</option>
+      </select>
       <button>Step</button>
       <button>Play</button>
       <button>Stop</button>
-      <button>Glider</button>
+      
     </div>
     <script type="module">
       const W = 400;
@@ -40,14 +44,15 @@
 
       var canvas = document.querySelector("canvas");
       var buttons = document.querySelectorAll("button");
-      var select = document.querySelector("select");
+      var selectMethod = document.querySelectorAll("select")[0];
+      var selectScenario = document.querySelectorAll("select")[1];
       canvas.width = W;
       canvas.height = H;
       var ctx = canvas.getContext("2d");
       drawMap(map);
       var animationID;
       
-      select.addEventListener("change", function(e){
+      selectMethod.addEventListener("change", function(e){
         console.log(e.target.value);
         switch (e.target.value) {
           case "death":
@@ -60,6 +65,24 @@
         }
         
       });
+
+      selectScenario.addEventListener("change", function(e){
+        console.log(e.target.value);
+        switch (e.target.value) {
+          case "gliders":
+            scenarioPutGliders(map);
+            e.target.value = "";
+            break;  
+          case "reset1":
+            scenarioReset1();
+            e.target.value = "";
+          break;  
+          default:
+          
+          break;
+        }
+      });
+
       canvas.addEventListener("click", function(e) {
         const tC = Math.floor(e.offsetX / S);
         const tL = Math.floor(e.offsetY / S);
@@ -203,7 +226,7 @@
         }
       }
 
-      function putGliderOnScreen(map){
+      function scenarioPutGliders(map){
         // 1 Glider
         map[27][37] = 2;
         map[27][38] = 2;
@@ -222,33 +245,29 @@
         drawMap(map);
       }
 
-      buttons[0].addEventListener("click", function(){
-        animation = false;
-        map  = initMap(HS, WS, 1);
-        map2 = initMap(HS, WS, 1);
-        animation = true;
-        drawMap(map);
-      });
+    function scenarioReset1() {
+      animation = false;
+            map  = initMap(HS, WS, 1);
+            map2 = initMap(HS, WS, 1);
+            animation = true;
+            drawMap(map);
+    }
 
-      buttons[1].addEventListener("click", function(){
+      buttons[0].addEventListener("click", function(){
         steps = 1;
         fullstep();
       });
 
-      buttons[2].addEventListener("click", function(){
+      buttons[1].addEventListener("click", function(){
         animation = true;
         fullstepWithoutSteps();
       });
 
-      buttons[3].addEventListener("click", function(){
+      buttons[2].addEventListener("click", function(){
         animation = false;
         steps = 0;
       });
 
-      buttons[4].addEventListener("click", function(){
-        console.log("Posicionando glider na interface");
-        putGliderOnScreen(map);
-      });
 
     </script>
   </body>
