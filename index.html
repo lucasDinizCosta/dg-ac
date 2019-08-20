@@ -10,8 +10,9 @@
     <!--canvas width="400" height="300"></canvas>-->
     <div>
       <select name="method">
-        <option value="0">Game of Life</option>
-        <option value="1">Game of Death</option>
+        <option value="life">Game of Life</option>
+        <option value="death">Game of Death</option>
+        <option value="wall">Game of Wall</option>
       </select>
       <button>Reset</button>
       <button>Step</button>
@@ -35,7 +36,7 @@
       map = initMap(HS, WS, 1);
       map2 = initMap(HS, WS, 1);
       var animation = true;
-      var method = gameOfDeathRulesAutomata;
+      var method = gameOfLifeRulesAutomata;
 
       var canvas = document.querySelector("canvas");
       var buttons = document.querySelectorAll("button");
@@ -49,10 +50,11 @@
       select.addEventListener("change", function(e){
         console.log(e.target.value);
         switch (e.target.value) {
-          case 1:
+          case "death":
             method = gameOfDeathRulesAutomata;
             break;  
           default:
+            e.target.value = "life";
             method = gameOfLifeRulesAutomata;
           break;
         }
