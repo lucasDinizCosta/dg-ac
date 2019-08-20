@@ -39,6 +39,7 @@
       canvas.height = H;
       var ctx = canvas.getContext("2d");
       drawMap(map);
+      var animationID;
 
       canvas.addEventListener("click", function(e) {
         const tC = Math.floor(e.offsetX / S);
@@ -61,7 +62,7 @@
         }
       }
 
-      function fullstepGameOfLife(t) {
+      function fullstep(t) {
         dt = (t - te) / 1000;
         gameOfLifeRulesAutomata();
         toggleMaps();
@@ -69,18 +70,18 @@
         te = t;
         steps--;
         if (steps > 0) {
-          requestAnimationFrame(fullstepGameOfLife);
+          requestAnimationFrame(fullstep);
         }
       }
 
-      function fullstepGameOfLifeWithoutSteps(t){
+      function fullstepWithoutSteps(t){
         dt = (t - te) / 1000;
         gameOfLifeRulesAutomata();
         toggleMaps();
         drawMap(map);
         te = t;
         if (animation) {
-          requestAnimationFrame(fullstepGameOfLifeWithoutSteps);
+          requestAnimationFrame(fullstepWithoutSteps);
         }        
       }
 
@@ -97,18 +98,15 @@
         }
       }
 
-      function countAdGameOfLife(mapx, y, x, tp) { //Conta as células de um tipo específico ao redor da célula (x,y)
+      function countAdjacents(mapx, y, x, tp) { //Conta as células de um tipo específico ao redor da célula (x,y)
         let total = 0;
         const mL = Math.max(y - 1, 0);
         const ML = Math.min(y + 1, mapx.length-1);
         const mC = Math.max(x - 1, 0);
         const MC = Math.min(x + 1, mapx[0].length-1);
-        //console.log("mL: "+ mL+ " ML: "+ ML + " mC: " + mC + " MC: " + MC + " x: "+ x + " y: " + y + " tp: "+ tp);
         for (let l = mL; l <= ML; l++) {
           for (let c = mC; c <= MC; c++) {
-            //console.log("["+l+"]"+"["+c+"] -- tp: " + mapx[l][c]);
             if (mapx[l][c] === tp) {
-              //console.log("["+l+"]"+"["+c+"]");
               total++;
             }
           }
@@ -116,7 +114,6 @@
         if(mapx[y][x] === tp){ //Desconta o valor da celula central
           total--;
         }
-        //console.log("total: " + total);
         return total;
       }
 
@@ -141,32 +138,24 @@
             map2[l][c] = map[l][c];
             switch (map[l][c]) {
               case 1: //Celula morta
-                if(countAdGameOfLife(map, l, c, 2) === 3){ //Com 3 vizinhos vivos, renasce
+                if(countAdjacents(map, l, c, 2) === 3){ //Com 3 vizinhos vivos, renasce
                   map2[l][c] = 2;
-                  //console.log("Caso 4 -- ["+l+"]["+c+"]");
                 }
                 break;
               case 2: //Celula viva
-                if (countAdGameOfLife(map, l, c, 2) >= 2 && countAdGameOfLife(map, l, c, 2) <= 3) {
+                if (countAdjacents(map, l, c, 2) >= 2 && countAdjacents(map, l, c, 2) <= 3) {
                   map2[l][c] = 2;
-                  //console.log("Caso 1");
                 }
-                else if (countAdGameOfLife(map, l, c, 2) >= 0 && countAdGameOfLife(map, l, c, 2) <= 1) {
+                else if (countAdjacents(map, l, c, 2) >= 0 && countAdjacents(map, l, c, 2) <= 1) {
                   map2[l][c] = 1;
-                  //console.log("Caso 2");
                 }
-                else if (countAdGameOfLife(map, l, c, 2) >= 4){
+                else if (countAdjacents(map, l, c, 2) >= 4){
                   map2[l][c] = 1;
-                  //console.log("Caso 3");
                 }
                 break;
             }
-            /*if(l === 1 && c === 1){
-              console.logcountAdGameOfLife(map, l, c, 2));
-            }*/
           }
         }
-        //console.log(map2);
       }
 
       function putGliderOnScreen(map){
@@ -198,13 +187,12 @@
 
       buttons[1].addEventListener("click", function(){
         steps = 1;
-        fullstepGameOfLife();
+        fullstep();
       });
 
       buttons[2].addEventListener("click", function(){
         animation = true;
-        fullstepGameOfLifeWithoutSteps();
-        //requestAnimationFrame(fullstepGameOfLifeWithoutSteps());
+        fullstepWithoutSteps();
       });
 
       buttons[3].addEventListener("click", function(){
