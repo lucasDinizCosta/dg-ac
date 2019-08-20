@@ -259,6 +259,7 @@
     }    
     
     function scenarioRandom() {
+      let ct = [0,0,0];
       animation = false;
       function rnd(L,C) {
         let mapx = [];
@@ -267,9 +268,13 @@
           for (let c = 0; c < C; c++) {
             let r = Math.random();
             let v = r<0.1?2:r<0.5?1:0;
+            ct[v]++;
             mapx[l][c] = v;
           }
         }
+        const t = L*C;
+        console.log(`${(ct[0]/t)*100}%,${(ct[1]/t)*100}%,${(ct[2]/t)*100}%`);
+        
         return mapx;
       }
       map  = rnd(HS, WS);
