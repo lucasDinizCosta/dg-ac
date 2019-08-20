@@ -41,10 +41,11 @@
       drawMap(map);
 
       canvas.addEventListener("click", function(e) {
-        let tC = Math.floor(e.offsetX / S);
-        let tL = Math.floor(e.offsetY / S);
+        const tC = Math.floor(e.offsetX / S);
+        const tL = Math.floor(e.offsetY / S);
 
-        setArea(map, tC, tL, 1, 1, 2);
+        const d = map[tL][tC]<2?map[tL][tC]+1:0;
+        setArea(map, tC, tL, 1, 1, d);
         drawMap(map);
       });
 
