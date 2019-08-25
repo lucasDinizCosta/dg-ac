@@ -18,7 +18,8 @@
         <option value="">Scenarios</option>
         <option value="gliders">Gliders</option>
         <option value="reset1">Reset 1</option>
-        <option value="random">Radom</option>
+        <option value="random">Random</option>
+        <option value="randomWall">Random Wall</option>
       </select>
       <button>Step</button>
       <button>Play</button>
@@ -52,13 +53,19 @@
       var ctx = canvas.getContext("2d");
       drawMap(map);
       var animationID;
-      
+
+      //Parameters GameOfWall
+      var r = 0.5, n = 0, T = 0, M = 0;
+    
       selectMethod.addEventListener("change", function(e){
         console.log(e.target.value);
         switch (e.target.value) {
           case "death":
             method = gameOfDeathRulesAutomata;
             break;  
+          case "wall":
+            method = gameOfWallRulesAutomata;
+            break; 
           default:
             e.target.value = "life";
             method = gameOfLifeRulesAutomata;
@@ -74,14 +81,18 @@
             scenarioPutGliders(map);
             e.target.value = "";
             break;  
-            case "reset1":
-            scenarioReset1();
+          case "reset1":
+            scenarioReset1(1);
             e.target.value = "";
-          break;  
+            break;  
           case "random":
             scenarioRandom();
             e.target.value = "";
-          break;  
+            break;
+          case "randomWall":
+            scenarioRandomWall();
+            e.target.value = "";
+            break;    
           default:
           
           break;
@@ -231,6 +242,43 @@
         }
       }
 
+      function gameOfWallRulesAutomata(){
+        /**
+        * Types:
+        *   0 => floor;
+        *   1 => rock
+        *   2 => wall
+        */
+        for (let l = 0; l < map2.length; l++) {
+          for (let c = 0; c < map2[0].length; c++) {
+            map2[l][c] = map[l][c];
+            switch (map[l][c]) {
+              case 0: //Floor
+                if(countAdjacents(map, l, c, 2) === 2){ //Com 3 vizinhos vivos, renasce
+                  map2[l][c] = 1;
+                }
+                break;
+              case 1: //Rock
+                if(countAdjacents(map, l, c, 2) === 2){ //Com 3 vizinhos vivos, renasce
+                  map2[l][c] = 1;
+                }
+                break;
+              case 2: //Wall
+                if (countAdjacents(map, l, c, 2) >= 2 && countAdjacents(map, l, c, 2) <= 1) {
+                  map2[l][c] = 2;
+                }
+                else if (countAdjacents(map, l, c, 2) >= 0 && countAdjacents(map, l, c, 2) <= 1) {
+                  map2[l][c] = 1;
+                }
+                else if (countAdjacents(map, l, c, 2) >= 4){
+                  map2[l][c] = 1;
+                }
+                break;
+            }
+          }
+        }
+      }
+
       function scenarioPutGliders(map){
         // 1 Glider
         map[27][37] = 2;
@@ -250,13 +298,13 @@
         drawMap(map);
       }
 
-      function scenarioReset1() {
-      animation = false;
-            map  = initMap(HS, WS, 1);
-            map2 = initMap(HS, WS, 1);
-            animation = true;
-            drawMap(map);
-    }    
+      function scenarioReset1(tp) {
+        animation = false;
+        map  = initMap(HS, WS, tp);
+        map2 = initMap(HS, WS, tp);
+        animation = true;
+        drawMap(map);
+      }    
     
     function scenarioRandom() {
       let ct = [0,0,0];
@@ -278,6 +326,27 @@
         return mapx;
       }
       map  = rnd(HS, WS);
+      animation = true;
+      drawMap(map);
+    }
+
+    function scenarioRandomWall() {
+      animation = false;
+      scenarioReset1(0);          //Init with floor completely
+      let matrix = [];
+      for(let l = 0; l < HS; l++){
+        for(let c = 0; c < WS; c++){
+          matrix.push([l,c]);
+        }
+      }
+      let rockInMap = (r * HS * WS)
+      for(let i = 0; i < rockInMap; i++){
+        let matrixIndexRandom = Math.floor(Math.random() * matrix.length);
+        map[matrix[matrixIndexRandom][0]][matrix[matrixIndexRandom][1]] = 2;
+        map2[matrix[matrixIndexRandom][0]][matrix[matrixIndexRandom][1]] = 2;
+        matrix.splice(matrixIndexRandom, 1);
+      }
+      //console.log("Floor: " + ((HS * WS) - rockInMap) + " Rock: " + rockInMap);
       animation = true;
       drawMap(map);
     }
