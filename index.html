@@ -24,14 +24,22 @@
       <button>Step</button>
       <button>Play</button>
       <button>Stop</button>
-      
+      <br></br>
+      <label><b>Lines: </b></label>
+      <input id="numRows" type="number" min="20" max="200" style="width:50px; margin-right:12px">
+      <label><b>Columns: </b></label>
+      <input id="numColumns" type="number" min="20" max="200" style="width:50px; margin-right:12px">
+      <label><b>Size: </b></label>
+      <input id="sizeCell" type="number" min="20" max="40" style="width:50px; margin-right:12px">
+      <button>Set</button>
+      <br></br>      
     </div>
     <script type="module">
-      const W = 400;
-      const H = 300;
-      const S = 10;
-      const HS = H / S;
-      const WS = W / S;
+      var W = 400;
+      var H = 300;
+      var S = 10;
+      var HS = H / S;
+      var WS = W / S;
       const COLORS = ["tan", "chocolate", "brown"];
       console.log(S, W, H, WS, HS);
       var steps = 0;
@@ -55,7 +63,7 @@
       var animationID;
 
       //Parameters GameOfWall
-      var r = 0.5, n = 0, T = 0, M = 0;
+      var r = 0.5, n = 0, T = 4, M = 0;
     
       selectMethod.addEventListener("change", function(e){
         console.log(e.target.value);
@@ -246,32 +254,38 @@
         /**
         * Types:
         *   0 => floor;
-        *   1 => rock
-        *   2 => wall
+        *   1 => wall;
+        *   2 => rock;
         */
         for (let l = 0; l < map2.length; l++) {
           for (let c = 0; c < map2[0].length; c++) {
             map2[l][c] = map[l][c];
             switch (map[l][c]) {
               case 0: //Floor
-                if(countAdjacents(map, l, c, 2) === 2){ //Com 3 vizinhos vivos, renasce
-                  map2[l][c] = 1;
-                }
-                break;
-              case 1: //Rock
-                if(countAdjacents(map, l, c, 2) === 2){ //Com 3 vizinhos vivos, renasce
-                  map2[l][c] = 1;
-                }
-                break;
-              case 2: //Wall
-                if (countAdjacents(map, l, c, 2) >= 2 && countAdjacents(map, l, c, 2) <= 1) {
+                if(countAdjacents(map, l, c, 2) >= T){ 
                   map2[l][c] = 2;
                 }
-                else if (countAdjacents(map, l, c, 2) >= 0 && countAdjacents(map, l, c, 2) <= 1) {
-                  map2[l][c] = 1;
+                else{
+                  map2[l][c] = 0;
                 }
-                else if (countAdjacents(map, l, c, 2) >= 4){
+                break;
+              case 1: //Wall
+                if(countAdjacents(map, l, c, 2) >= T){ 
+                  map2[l][c] = 2;
+                }
+                else{
+                  map2[l][c] = 0;
+                }
+                break;
+              case 2: //Rock
+                /*if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
                   map2[l][c] = 1;
+                }*/
+                if(countAdjacents(map, l, c, 2) >= T){ 
+                  map2[l][c] = 2;
+                }
+                else{
+                  map2[l][c] = 0;
                 }
                 break;
             }
@@ -364,6 +378,17 @@
       buttons[2].addEventListener("click", function(){
         animation = false;
         steps = 0;
+      });
+
+      buttons[3].addEventListener("click", function(){
+        HS = parseInt(document.getElementById("numRows").value);
+        WS = parseInt(document.getElementById("numColumns").value);     ///Converte pra inteiro o valor digitado
+        S = parseInt(document.getElementById("sizeCell").value);
+        W = S * WS;
+        H = S * HS;
+        canvas.width = W;
+        canvas.height = H;
+        scenarioReset1(1);
       });
 
 
