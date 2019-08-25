@@ -21,7 +21,9 @@
         <option value="random">Random</option>
         <option value="randomWall">Random Wall</option>
       </select>
-      <button>Step</button>
+      <label><b> Steps: </b></label>
+      <input id="numberSteps" type="number" min="20" max="200" style="width:50px; margin-left:5px; margin-right:5px">
+      <button>Steps</button>
       <button>Play</button>
       <button>Stop</button>
       <br></br>
@@ -366,7 +368,12 @@
     }
 
       buttons[0].addEventListener("click", function(){
-        steps = 1;
+        if(document.getElementById("numberSteps").value === ""){
+          steps = 1;
+        }
+        else{
+          steps = parseInt(document.getElementById("numberSteps").value);
+        }
         fullstep();
       });
 
