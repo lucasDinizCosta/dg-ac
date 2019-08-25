@@ -28,13 +28,19 @@
       <button>Stop</button>
       <br></br>
       <label><b>Lines: </b></label>
-      <input id="numRows" type="number" min="20" max="200" style="width:50px; margin-right:12px">
+      <input id="numRows" type="number" min="0" max="200" style="width:50px; margin-right:12px">
       <label><b>Columns: </b></label>
-      <input id="numColumns" type="number" min="20" max="200" style="width:50px; margin-right:12px">
+      <input id="numColumns" type="number" min="0" max="200" style="width:50px; margin-right:12px">
       <label><b>Size: </b></label>
-      <input id="sizeCell" type="number" min="20" max="40" style="width:50px; margin-right:12px">
+      <input id="sizeCell" type="number" min="0" max="40" style="width:50px; margin-right:12px">
       <button>Set</button>
-      <br></br>      
+      <br></br>
+      <label><b>Moore: </b></label>
+      <input id="mooreNeighbors" type="number" min="0" max="200" style="width:50px; margin-right:12px">
+      <label><b>Total Rock: </b></label>
+      <input id="totRock" type="number" min="0" max="200" style="width:50px; margin-right:12px">  
+      <button>Set</button>
+      <br></br>
     </div>
     <script type="module">
       var W = 400;
@@ -65,7 +71,7 @@
       var animationID;
 
       //Parameters GameOfWall
-      var r = 0.5, n = 0, T = 4, M = 0;
+      var r = 0.5, n = 0, T = 5, Moore = 1;
     
       selectMethod.addEventListener("change", function(e){
         console.log(e.target.value);
@@ -113,7 +119,7 @@
         const tC = Math.floor(e.offsetX / S);
         const tL = Math.floor(e.offsetY / S);
 
-        const d = map[tL][tC]<2?map[tL][tC]+1:0;
+        const d = map[tL][tC] < 2 ? map[tL][tC] + 1 : 0;
         setArea(map, tC, tL, 1, 1, d);
         drawMap(map);
       });
@@ -139,6 +145,14 @@
         steps--;
         if (steps > 0) {
           requestAnimationFrame(fullstep);
+        }
+        else{
+          if(method === gameOfWallRulesAutomata){
+            gameOfWallRulesAutomataFinalStep();
+            toggleMaps();
+            drawMap(map);
+            console.log("FOI AQUI");
+          }
         }
       }
 
@@ -168,10 +182,10 @@
 
       function countAdjacents(mapx, y, x, tp) { //Conta as células de um tipo específico ao redor da célula (x,y)
         let total = 0;
-        const mL = Math.max(y - 1, 0);
-        const ML = Math.min(y + 1, mapx.length-1);
-        const mC = Math.max(x - 1, 0);
-        const MC = Math.min(x + 1, mapx[0].length-1);
+        const mL = Math.max(y - Moore, 0);
+        const ML = Math.min(y + Moore, mapx.length-1);
+        const mC = Math.max(x - Moore, 0);
+        const MC = Math.min(x + Moore, mapx[0].length-1);
         for (let l = mL; l <= ML; l++) {
           for (let c = mC; c <= MC; c++) {
             if (mapx[l][c] === tp) {
@@ -252,43 +266,74 @@
         }
       }
 
-      function gameOfWallRulesAutomata(){
+      function gameOfWallRulesAutomata(option){
         /**
         * Types:
         *   0 => floor;
-        *   1 => wall;
-        *   2 => rock;
+        *   1 => rock;
+        *   2 => wall;
         */
         for (let l = 0; l < map2.length; l++) {
           for (let c = 0; c < map2[0].length; c++) {
             map2[l][c] = map[l][c];
             switch (map[l][c]) {
               case 0: //Floor
-                if(countAdjacents(map, l, c, 2) >= T){ 
-                  map2[l][c] = 2;
-                }
-                else{
-                  map2[l][c] = 0;
+                if(countAdjacents(map, l, c, 1) >= T){ 
+                  map2[l][c] = 1;
                 }
                 break;
-              case 1: //Wall
-                if(countAdjacents(map, l, c, 2) >= T){ 
-                  map2[l][c] = 2;
+              case 1: //Rock
+                if(countAdjacents(map, l, c, 1) >= T){ 
+                  map2[l][c] = 1;
                 }
-                else{
+                /*else{
                   map2[l][c] = 0;
-                }
+                }*/
+                /*else{
+                  map2[l][c] = 0;
+                }*/
                 break;
-              case 2: //Rock
+              case 2: //wall
+                /*if(countAdjacents(map, l, c, 1) >= T){ 
+                  map2[l][c] = 1;
+                }*/
+                /*else{
+                  map2[l][c] = 0;
+                }*/
+                break;
+            }
+          }
+        }
+      }
+
+      function gameOfWallRulesAutomataFinalStep(){
+        /**
+        * Types:
+        *   0 => floor;
+        *   1 => rock;
+        *   2 => wall;
+        */
+        for (let l = 0; l < map2.length; l++) {
+          for (let c = 0; c < map2[0].length; c++) {
+            map2[l][c] = map[l][c];
+            switch (map[l][c]) {
+              case 0: //Floor
                 /*if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
                   map2[l][c] = 1;
                 }*/
-                if(countAdjacents(map, l, c, 2) >= T){ 
+                break;
+              case 1: //Rock
+                /*if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
+                  map2[l][c] = 1;
+                }*/
+                if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
                   map2[l][c] = 2;
                 }
-                else{
-                  map2[l][c] = 0;
-                }
+                break;
+              case 2: //Wall
+                /*if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
+                  map2[l][c] = 1;
+                }*/
                 break;
             }
           }
@@ -337,7 +382,7 @@
           }
         }
         const t = L*C;
-        console.log(`${(ct[0]/t)*100}%,${(ct[1]/t)*100}%,${(ct[2]/t)*100}%`);
+        console.log(`${(ct[0]/t)*100}%, ${(ct[1]/t)*100}%, ${(ct[2]/t)*100}%`);
         
         return mapx;
       }
@@ -358,8 +403,8 @@
       let rockInMap = (r * HS * WS)
       for(let i = 0; i < rockInMap; i++){
         let matrixIndexRandom = Math.floor(Math.random() * matrix.length);
-        map[matrix[matrixIndexRandom][0]][matrix[matrixIndexRandom][1]] = 2;
-        map2[matrix[matrixIndexRandom][0]][matrix[matrixIndexRandom][1]] = 2;
+        map[matrix[matrixIndexRandom][0]][matrix[matrixIndexRandom][1]] = 1;
+        map2[matrix[matrixIndexRandom][0]][matrix[matrixIndexRandom][1]] = 1;
         matrix.splice(matrixIndexRandom, 1);
       }
       //console.log("Floor: " + ((HS * WS) - rockInMap) + " Rock: " + rockInMap);
@@ -398,6 +443,23 @@
         scenarioReset1(1);
       });
 
+      buttons[4].addEventListener("click", function(){
+        if(document.getElementById("mooreNeighbors").value === ""){
+          Moore = 1;
+        }
+        else{
+          Moore = parseInt(document.getElementById("mooreNeighbors").value);
+        }
+        if(document.getElementById("totRock").value === ""){
+            T = 5;
+        }
+        else{
+          T = parseInt(document.getElementById("totRock").value);
+        }
+        /*map[27][37] = 2;// Ponto final do mapa
+        drawMap(map);
+        console.log(countAdjacents(map, 27, 37, 2));*/
+      });
 
     </script>
   </body>
