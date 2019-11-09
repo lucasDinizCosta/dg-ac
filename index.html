@@ -22,23 +22,23 @@
         <option value="randomWall">Random Wall</option>
       </select>
       <label><b> Steps: </b></label>
-      <input id="numberSteps" type="number" min="20" max="200" style="width:50px; margin-left:5px; margin-right:5px">
+      <input value="3" id="numberSteps" type="number" min="20" max="200" style="width:50px; margin-left:5px; margin-right:5px">
       <button>Steps</button>
       <button>Play</button>
       <button>Stop</button>
       <br></br>
       <label><b>Lines: </b></label>
-      <input id="numRows" type="number" min="0" max="200" style="width:50px; margin-right:12px">
+      <input value="50" id="numRows" type="number" min="0" max="200" style="width:50px; margin-right:12px">
       <label><b>Columns: </b></label>
-      <input id="numColumns" type="number" min="0" max="200" style="width:50px; margin-right:12px">
+      <input value="50"  id="numColumns" type="number" min="0" max="200" style="width:50px; margin-right:12px">
       <label><b>Size: </b></label>
-      <input id="sizeCell" type="number" min="0" max="40" style="width:50px; margin-right:12px">
+      <input value="10"  id="sizeCell" type="number" min="0" max="40" style="width:50px; margin-right:12px">
       <button>Set</button>
       <br></br>
       <label><b>Moore: </b></label>
-      <input id="mooreNeighbors" type="number" min="0" max="200" style="width:50px; margin-right:12px">
+      <input value="2"  id="mooreNeighbors" type="number" min="0" max="200" style="width:50px; margin-right:12px">
       <label><b>Total Rock: </b></label>
-      <input id="totRock" type="number" min="0" max="200" style="width:50px; margin-right:12px">  
+      <input value="13"  id="totRock" type="number" min="0" max="200" style="width:50px; margin-right:12px">  
       <button>Set</button>
       <br></br>
     </div>
@@ -180,12 +180,12 @@
         }
       }
 
-      function countAdjacents(mapx, y, x, tp) { //Conta as células de um tipo específico ao redor da célula (x,y)
+      function countAdjacentsMoore(mapx, y, x, tp, d=1) { //Conta as células de um tipo específico ao redor da célula (x,y)
         let total = 0;
-        const mL = Math.max(y - Moore, 0);
-        const ML = Math.min(y + Moore, mapx.length-1);
-        const mC = Math.max(x - Moore, 0);
-        const MC = Math.min(x + Moore, mapx[0].length-1);
+        const mL = Math.max(y - d, 0);
+        const ML = Math.min(y + d, mapx.length-1);
+        const mC = Math.max(x - d, 0);
+        const MC = Math.min(x + d, mapx[0].length-1);
         for (let l = mL; l <= ML; l++) {
           for (let c = mC; c <= MC; c++) {
             if (mapx[l][c] === tp) {
@@ -220,18 +220,18 @@
             map2[l][c] = map[l][c];
             switch (map[l][c]) {
               case 1: //Celula morta
-                if(countAdjacents(map, l, c, 2) === 3){ //Com 3 vizinhos vivos, renasce
+                if(countAdjacentsMoore(map, l, c, 2) === 3){ //Com 3 vizinhos vivos, renasce
                   map2[l][c] = 2;
                 }
                 break;
               case 2: //Celula viva
-                if (countAdjacents(map, l, c, 2) >= 2 && countAdjacents(map, l, c, 2) <= 3) {
+                if (countAdjacentsMoore(map, l, c, 2) >= 2 && countAdjacentsMoore(map, l, c, 2) <= 3) {
                   map2[l][c] = 2;
                 }
-                else if (countAdjacents(map, l, c, 2) >= 0 && countAdjacents(map, l, c, 2) <= 1) {
+                else if (countAdjacentsMoore(map, l, c, 2) >= 0 && countAdjacentsMoore(map, l, c, 2) <= 1) {
                   map2[l][c] = 1;
                 }
-                else if (countAdjacents(map, l, c, 2) >= 4){
+                else if (countAdjacentsMoore(map, l, c, 2) >= 4){
                   map2[l][c] = 1;
                 }
                 break;
@@ -246,18 +246,18 @@
             map2[l][c] = map[l][c];
             switch (map[l][c]) {
               case 1: //Celula morta
-                if(countAdjacents(map, l, c, 2) === 2){ //Com 3 vizinhos vivos, renasce
+                if(countAdjacentsMoore(map, l, c, 2) === 2){ //Com 3 vizinhos vivos, renasce
                   map2[l][c] = 1;
                 }
                 break;
               case 2: //Celula viva
-                if (countAdjacents(map, l, c, 2) >= 2 && countAdjacents(map, l, c, 2) <= 1) {
+                if (countAdjacentsMoore(map, l, c, 2) >= 2 && countAdjacentsMoore(map, l, c, 2) <= 1) {
                   map2[l][c] = 2;
                 }
-                else if (countAdjacents(map, l, c, 2) >= 0 && countAdjacents(map, l, c, 2) <= 1) {
+                else if (countAdjacentsMoore(map, l, c, 2) >= 0 && countAdjacentsMoore(map, l, c, 2) <= 1) {
                   map2[l][c] = 1;
                 }
-                else if (countAdjacents(map, l, c, 2) >= 4){
+                else if (countAdjacentsMoore(map, l, c, 2) >= 4){
                   map2[l][c] = 1;
                 }
                 break;
@@ -276,25 +276,31 @@
         for (let l = 0; l < map2.length; l++) {
           for (let c = 0; c < map2[0].length; c++) {
             map2[l][c] = map[l][c];
+            if(countAdjacentsMoore(map, l, c, 1, Moore) >= T){ 
+                  map2[l][c] = 1;
+                }else{
+                  map2[l][c] = 0;
+                }
+            continue;
             switch (map[l][c]) {
+
               case 0: //Floor
-                if(countAdjacents(map, l, c, 1) >= T){ 
+                if(countAdjacentsMoore(map, l, c, 1, Moore) >= T){ 
                   map2[l][c] = 1;
                 }
                 break;
               case 1: //Rock
-                if(countAdjacents(map, l, c, 1) >= T){ 
+                if(countAdjacentsMoore(map, l, c, 1, Moore) >= T){ 
                   map2[l][c] = 1;
-                }
-                /*else{
+                }else{
                   map2[l][c] = 0;
-                }*/
+                }
                 /*else{
                   map2[l][c] = 0;
                 }*/
                 break;
               case 2: //wall
-                /*if(countAdjacents(map, l, c, 1) >= T){ 
+                /*if(countAdjacentsMoore(map, l, c, 1) >= T){ 
                   map2[l][c] = 1;
                 }*/
                 /*else{
@@ -318,20 +324,20 @@
             map2[l][c] = map[l][c];
             switch (map[l][c]) {
               case 0: //Floor
-                /*if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
+                /*if (countAdjacentsMoore(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
                   map2[l][c] = 1;
                 }*/
                 break;
               case 1: //Rock
-                /*if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
+                /*if (countAdjacentsMoore(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
                   map2[l][c] = 1;
                 }*/
-                if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
+                if (countAdjacentsMoore(map, l, c, 0, 1) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
                   map2[l][c] = 2;
                 }
                 break;
               case 2: //Wall
-                /*if (countAdjacents(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
+                /*if (countAdjacentsMoore(map, l, c, 0) >= 1) {  //Celulas rock com 1 vizinho chão ou mais 
                   map2[l][c] = 1;
                 }*/
                 break;
@@ -458,7 +464,7 @@
         }
         /*map[27][37] = 2;// Ponto final do mapa
         drawMap(map);
-        console.log(countAdjacents(map, 27, 37, 2));*/
+        console.log(countAdjacentsMoore(map, 27, 37, 2));*/
       });
 
     </script>
